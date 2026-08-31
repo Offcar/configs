@@ -2,15 +2,16 @@
 {
     "layer": "top", // Waybar at top layer
     "position": "bottom", // Waybar position (top|bottom|left|right)
-    "height": 28, // Waybar height (to be removed for auto height)
+    "height": 22, // Waybar height (to be removed for auto height)
+    "margin": "0 6 6 6", // top right bottom left: sides match sway outer gaps (3px), 6px gap below
     // "width": 1280, // Waybar width
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [
-        "hyprland/workspaces",
-        "hyprland/mode",
-        //"hyprland/scratchpad",
-        "hyprland/window"
+        "sway/workspaces",
+        "sway/mode",
+        "sway/scratchpad",
+        "sway/window"
     ],
     "modules-center": [
         // "sway/window"
@@ -25,7 +26,7 @@
         "memory",
         "temperature",
         "keyboard-state",
-        // "backlight",
+        "backlight",
         // "hyprland/language",
         "battery",
         // "clock",
@@ -78,12 +79,11 @@
             "on": " "
         },
         "random-icons": {
-            "off": "<span color=\"#f53c3c\"></span> ",
+            "off": "<span color=\"#fb4934\"></span> ",
             "on": " "
         },
         "repeat-icons": {
-            "on": " "
-        },
+            "on": " " },
         "single-icons": {
             "on": "1 "
         },
@@ -132,7 +132,7 @@
     "backlight": {
         // "device": "acpi_video1",
         "format": "{percent}% {icon}",
-        "format-icons": ["🌑", "🌘", "🌗", "🌖", "🌕"]
+        "format-icons": ["󰃚", "󰃛", "󰃜", "󰃝", "󰃞", "󰃟", "󰃠"]
     },
     "battery": {
         "states": {
