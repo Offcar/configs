@@ -33,7 +33,7 @@ y = 0
 [cursor]
 style = { shape = "Block", blinking = "Off" }
 
-# Gruvbox dark theme
+# ===== COLOR SCHEME: GRUVBOX ======
 [colors.primary]
 background = "#282828"
 foreground = "#ebdbb2"
