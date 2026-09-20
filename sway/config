@@ -207,5 +207,7 @@ bar {
 #
 for_window [app_id="google-chrome" title="Meet *"] floating enable
 for_window [class="fcadefbneo.exe"] floating enable
+for_window [app_id="blueman-manager"] floating enable
+for_window [app_id="org.pulseaudio.pavucontrol"] floating enable
 
 include /etc/sway/config.d/*
