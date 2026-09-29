@@ -1,0 +1,445 @@
+# =============================================================================
+# ~/.config/yazi/yazi.toml
+# =============================================================================
+#
+# CONFIGURACIÓN PERSONAL DE YAZI
+#
+# Esta configuración define principalmente:
+#
+#   1. [opener]  -> QUÉ programas/acciones existen para abrir archivos.
+#   2. [open]    -> QUÉ opener(s) se ofrecen según el tipo de archivo.
+#
+#
+# -----------------------------------------------------------------------------
+# CÓMO FUNCIONAN LOS OPENERS
+# -----------------------------------------------------------------------------
+#
+# Primero defines un opener:
+#
+#   [opener]
+#
+#   image = [
+#     { run = "swayimg %s1", orphan = true, desc = "View with Swayimg" },
+#   ]
+#
+# Luego puedes asignarlo a determinados archivos:
+#
+#   [open]
+#   prepend_rules = [
+#     { mime = "image/*", use = "image" },
+#   ]
+#
+#
+# -----------------------------------------------------------------------------
+# AGRUPAR VARIOS OPENERS
+# -----------------------------------------------------------------------------
+#
+# Puedes ofrecer varias acciones para el mismo tipo de archivo:
+#
+#   { mime = "image/*", use = [ "image", "gimp" ] }
+#
+# El ORDEN importa.
+#
+#   [ "image", "gimp" ]
+#       ^
+#       |
+#       +---- primera opción / acción predeterminada
+#
+# En nuestro caso:
+#
+#   Enter sobre imagen  -> Swayimg
+#
+# mientras que el selector de openers permitirá elegir:
+#
+#   - View with Swayimg
+#   - Edit with GIMP
+#
+#
+# Esto permite experimentar fácilmente. Por ejemplo:
+#
+#   use = [ "gimp", "image" ]
+#
+# haría que GIMP quede primero.
+#
+#
+# -----------------------------------------------------------------------------
+# %s, %s1, etc.
+# -----------------------------------------------------------------------------
+#
+# Yazi sustituye estos valores por los archivos seleccionados.
+#
+# En esta configuración usamos principalmente:
+#
+#   %s    -> archivos seleccionados
+#   %s1   -> primer archivo seleccionado
+#
+#
+# -----------------------------------------------------------------------------
+# orphan = true
+# -----------------------------------------------------------------------------
+#
+# Hace que el programa gráfico quede separado de Yazi.
+#
+# Es conveniente para:
+#
+#   swayimg
+#   GIMP
+#   Firefox
+#   Xarchiver
+#
+# Así Yazi no queda esperando a que cierres el programa.
+#
+# =============================================================================
+
+
+
+# =============================================================================
+# OPENERS
+# =============================================================================
+
+[opener]
+
+
+# -----------------------------------------------------------------------------
+# IMÁGENES — VISOR
+# -----------------------------------------------------------------------------
+#
+# Visor rápido y liviano.
+#
+# Esta será nuestra opción principal para imágenes.
+#
+
+image = [
+  {
+    run = "swayimg %s1",
+    orphan = true,
+    desc = "View with Swayimg"
+  },
+]
+
+
+# -----------------------------------------------------------------------------
+# IMÁGENES — EDITOR
+# -----------------------------------------------------------------------------
+#
+# GIMP queda disponible como segunda opción.
+#
+# No queremos ejecutarlo automáticamente con Enter porque es mucho más pesado
+# que un simple visor.
+#
+
+gimp = [
+  {
+    run = "gimp %s1",
+    orphan = true,
+    desc = "Edit with GIMP"
+  },
+]
+
+krita = [
+  {
+    run = "krita %s1",
+    orphan = true,
+    desc = "Edit with KRITA"
+  },
+]
+
+# -----------------------------------------------------------------------------
+# PDF
+# -----------------------------------------------------------------------------
+#
+# Por ahora mantenemos Firefox explícitamente para PDF.
+#
+# Si más adelante quieres usar otro visor (Zathura, Evince, etc.), basta con
+# cambiar este opener.
+#
+
+pdf-firefox = [
+  {
+    run = "firefox %s1",
+    orphan = true,
+    desc = "Open PDF in Firefox"
+  },
+]
+
+
+# -----------------------------------------------------------------------------
+# ARCHIVOS COMPRIMIDOS — EXTRAER
+# -----------------------------------------------------------------------------
+#
+# Usa el extractor integrado de Yazi.
+#
+# La idea es extraer el archivo en la misma carpeta.
+#
+
+extract = [
+  {
+    run = "ya pub extract --list %s",
+    desc = "Extract here"
+  },
+]
+
+
+# -----------------------------------------------------------------------------
+# ARCHIVOS COMPRIMIDOS — XARCHIVER
+# -----------------------------------------------------------------------------
+#
+# Alternativa gráfica.
+#
+# En las reglas de abajo dejamos:
+#
+#   use = [ "extract", "xarchiver" ]
+#
+# Eso significa:
+#
+#   acción principal -> extract
+#   alternativa      -> Xarchiver
+#
+
+xarchiver = [
+  {
+    run = "xarchiver %s1",
+    orphan = true,
+    desc = "Open with Xarchiver"
+  },
+]
+
+
+
+# =============================================================================
+# REGLAS PARA ABRIR ARCHIVOS
+# =============================================================================
+#
+# prepend_rules agrega nuestras reglas ANTES de las reglas internas de Yazi.
+#
+# Esto permite sobreescribir el comportamiento predeterminado sin tener que
+# redefinir absolutamente todos los tipos de archivo.
+#
+# =============================================================================
+
+[open]
+
+prepend_rules = [
+
+
+  # ===========================================================================
+  # IMÁGENES
+  # ===========================================================================
+  #
+  # Primera opción:
+  #
+  #   image -> Swayimg
+  #
+  # Segunda opción:
+  #
+  #   gimp -> GIMP
+  #
+  # Por lo tanto:
+  #
+  #   Enter -> Swayimg
+  #
+  # y desde el selector puedes escoger GIMP.
+  #
+
+  {
+    mime = "image/*",
+    use = [ "image", "gimp", "krita" ]
+  },
+
+
+  # ===========================================================================
+  # PDF
+  # ===========================================================================
+  #
+  # Enter -> Firefox
+  #
+
+  {
+    mime = "application/pdf",
+    use = "pdf-firefox"
+  },
+
+
+  # ===========================================================================
+  # ZIP
+  # ===========================================================================
+
+  {
+    url = "*.zip",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    mime = "application/zip",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # RAR
+  # ===========================================================================
+
+  {
+    url = "*.rar",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    mime = "application/vnd.rar",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    mime = "application/x-rar",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # 7-ZIP
+  # ===========================================================================
+
+  {
+    url = "*.7z",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    mime = "application/x-7z-compressed",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # TAR
+  # ===========================================================================
+
+  {
+    url = "*.tar",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    mime = "application/x-tar",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # TAR.GZ / TGZ
+  # ===========================================================================
+
+  {
+    url = "*.tar.gz",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.tgz",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # TAR.XZ / TXZ
+  # ===========================================================================
+
+  {
+    url = "*.tar.xz",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.txz",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # TAR.BZ2 / TBZ / TBZ2
+  # ===========================================================================
+
+  {
+    url = "*.tar.bz2",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.tbz",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.tbz2",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # TAR.ZST / TZST
+  # ===========================================================================
+
+  {
+    url = "*.tar.zst",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.tzst",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # COMPRESIONES INDIVIDUALES
+  # ===========================================================================
+  #
+  # .gz / .bz2 / .xz / .zst sin necesariamente contener un TAR.
+  #
+
+  {
+    url = "*.gz",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.bz2",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.xz",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.zst",
+    use = [ "extract", "xarchiver" ]
+  },
+
+
+  # ===========================================================================
+  # OTROS FORMATOS COMPRIMIDOS
+  # ===========================================================================
+
+  {
+    url = "*.cab",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.arj",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.lha",
+    use = [ "extract", "xarchiver" ]
+  },
+
+  {
+    url = "*.lzh",
+    use = [ "extract", "xarchiver" ]
+  },
+
+]

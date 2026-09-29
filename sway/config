@@ -2,6 +2,7 @@
 exec_always --no-startup-id gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 exec_always --no-startup-id gsettings set org.gnome.desktop.interface gtk-theme 'Greybird-dark'
 exec_always --no-startup-id gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
+exec_always --no-startup-id pkttyagent --process $$
 
 exec nm-applet 
 exec blueman-applet
@@ -20,7 +21,7 @@ set $left h
 set $down j
 set $up k
 set $right l
-set $term alacritty
+set $term foot
 set $menu rofi -show drun -i -I -show-icons -icon-theme "Papirus-Dark"
 
 input type:touchpad {
