@@ -1,0 +1,221 @@
+// Configuración de niri migrada desde ~/.config/sway/config
+// Docs: https://niri-wm.github.io/niri/Configuration:-Introduction
+// niri recarga este archivo automáticamente al guardarlo.
+
+// ─── Entorno ────────────────────────────────────────────────────────────────
+// niri --session ya exporta a systemd y dbus: WAYLAND_DISPLAY, DISPLAY
+// (xwayland-satellite), XDG_CURRENT_DESKTOP=niri, XDG_SESSION_TYPE=wayland
+// y NIRI_SOCKET. Aquí van las extra para apps lanzadas por niri; más abajo
+// se re-exportan a systemd/dbus para servicios y apps activadas por dbus.
+environment {
+    QT_QPA_PLATFORM "wayland;xcb"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    MOZ_ENABLE_WAYLAND "1"
+    _JAVA_AWT_WM_NONREPARENTING "1"
+}
+
+cursor {
+    xcursor-size 24
+}
+
+// ─── Arranque ───────────────────────────────────────────────────────────────
+// Propagar el entorno a systemd --user y dbus, y limpiar restos de Sway.
+spawn-sh-at-startup "systemctl --user unset-environment SWAYSOCK I3SOCK; dbus-update-activation-environment --systemd QT_QPA_PLATFORM ELECTRON_OZONE_PLATFORM_HINT MOZ_ENABLE_WAYLAND _JAVA_AWT_WM_NONREPARENTING XCURSOR_THEME XCURSOR_SIZE"
+
+// Tema GTK (equivalente a los exec_always gsettings).
+spawn-sh-at-startup "gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'; gsettings set org.gnome.desktop.interface gtk-theme 'Greybird-dark'; gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'"
+
+// Llavero (Secret portal) y agente polkit.
+spawn-at-startup "gnome-keyring-daemon" "--start" "--components=secrets"
+spawn-at-startup "/usr/libexec/xfce-polkit"
+
+spawn-at-startup "swaync"
+spawn-sh-at-startup "waybar -c ~/.config/waybar/config-niri.jsonc"
+
+// nm-applet, blueman-applet y gammastep-indicator NO se lanzan aquí:
+// niri.service arranca xdg-desktop-autostart.target y los inicia desde
+// /etc/xdg/autostart y ~/.config/autostart.
+
+// ─── Entrada ────────────────────────────────────────────────────────────────
+input {
+    keyboard {
+        xkb {
+            layout "es"
+        }
+    }
+
+    touchpad {
+        tap
+    }
+
+    mouse {
+        accel-profile "flat"
+        accel-speed 0.0
+    }
+
+    // El foco sigue al mouse, y el mouse salta a la ventana enfocada con teclado
+    focus-follows-mouse max-scroll-amount="0%"
+    warp-mouse-to-focus
+}
+
+// ─── Salidas ────────────────────────────────────────────────────────────────
+output "HDMI-A-1" {
+    mode "1920x1080@120.000"
+		scale 1
+}
+
+output "eDP-1" {
+    mode "1920x1200@60.026"
+    scale 1
+}
+
+// ─── Layout ─────────────────────────────────────────────────────────────────
+layout {
+    // Sway: gaps inner 3 + outer 3 → 3 px entre ventanas, 6 px en los bordes.
+    gaps 3
+    struts {
+        left 3
+        right 3
+        top 3
+        bottom 3
+    }
+
+    background-color "#000000"
+
+    default-column-width { proportion 0.5; }
+
+    focus-ring {
+        off
+    }
+
+    // Sway: default_border pixel 3 + colores client.*
+    border {
+        width 3
+        active-color "#966060"
+        inactive-color "#6f6f6f"
+        urgent-color "#8b4a4a"
+    }
+}
+
+overview {
+    backdrop-color "#000000"
+}
+
+// Sway usa decoraciones de servidor por defecto; esto replica ese comportamiento.
+prefer-no-csd
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+screenshot-path "~/Imágenes/Capturas de pantalla/Captura %Y-%m-%d %H-%M-%S.png"
+
+// ─── Reglas de ventana ──────────────────────────────────────────────────────
+window-rule {
+    match app-id=r#"fcadefbneo\.exe"#
+    match app-id="blueman-manager"
+    match app-id="org.pulseaudio.pavucontrol"
+    open-floating true
+}
+
+// ─── Atajos ─────────────────────────────────────────────────────────────────
+binds {
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // Básicos
+    Mod+Return hotkey-overlay-title="Terminal: foot" { spawn "foot"; }
+    Mod+D hotkey-overlay-title="Lanzador: rofi" { spawn "rofi" "-show" "drun" "-i" "-I" "-show-icons" "-icon-theme" "Papirus-Dark"; }
+    Mod+Shift+Q repeat=false { close-window; }
+    Mod+Shift+E { quit; }
+    Mod+Ctrl+L hotkey-overlay-title="Bloquear pantalla" { spawn-sh "~/.config/niri/lock.sh"; }
+
+    // Pantalla del portátil on/off (Sway: output eDP-1 toggle)
+    Mod+Ctrl+1 { spawn-sh "~/.config/niri/toggle-output.sh eDP-1"; }
+
+    // Foco
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+
+    // Mover
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+J     { move-window-down; }
+    Mod+Shift+K     { move-window-up; }
+    Mod+Shift+L     { move-column-right; }
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Down  { move-window-down; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Right { move-column-right; }
+
+    // Meter/sacar ventana de la columna (lo más parecido a los splits de Sway)
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+
+    // Workspaces (en niri son dinámicos: el índice apunta al n-ésimo existente)
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+    Mod+Shift+1 { move-window-to-workspace 1; }
+    Mod+Shift+2 { move-window-to-workspace 2; }
+    Mod+Shift+3 { move-window-to-workspace 3; }
+    Mod+Shift+4 { move-window-to-workspace 4; }
+    Mod+Shift+5 { move-window-to-workspace 5; }
+    Mod+Shift+6 { move-window-to-workspace 6; }
+    Mod+Shift+7 { move-window-to-workspace 7; }
+    Mod+Shift+8 { move-window-to-workspace 8; }
+    Mod+Shift+9 { move-window-to-workspace 9; }
+    Mod+Shift+0 { move-window-to-workspace 10; }
+
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp   cooldown-ms=150 { focus-workspace-up; }
+
+    // Layout
+    Mod+T { toggle-column-tabbed-display; }
+    Mod+F       { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+Ctrl+F  { expand-column-to-available-width; }
+    Mod+V       { toggle-window-floating; }
+    Mod+Space { switch-focus-between-floating-and-tiling; }
+    Mod+O repeat=false { toggle-overview; }
+    Mod+C { center-column; }
+
+    // Redimensionar (Sway: modo "resize")
+    Mod+R { switch-preset-column-width; }
+    Mod+M { maximize-window-to-edges; }
+    Mod+Minus       { set-column-width "-10%"; }
+    Mod+Plus        { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Plus  { set-window-height "+10%"; }
+    Mod+KP_Subtract       { set-column-width "-10%"; }
+    Mod+KP_Add            { set-column-width "+10%"; }
+    Mod+Shift+KP_Subtract { set-window-height "-10%"; }
+    Mod+Shift+KP_Add      { set-window-height "+10%"; }
+
+    // Multimedia
+    XF86AudioMute        allow-when-locked=true { spawn-sh "pactl set-sink-mute @DEFAULT_SINK@ toggle"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -5%"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +5%"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn-sh "pactl set-source-mute @DEFAULT_SOURCE@ toggle"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
+
+    // Capturas (grimshot depende de swaymsg; se usan las nativas de niri,
+    // que guardan en screenshot-path y copian al portapapeles)
+    Mod+Shift+P { screenshot; }
+    Mod+Ctrl+P  { screenshot-screen; }
+    Print       { screenshot; }
+
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+}
