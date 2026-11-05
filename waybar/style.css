@@ -1,6 +1,7 @@
 * {
     font-family: 'Noto Sans Mono', 'JetBrainsMono Nerd Font', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-    font-size: 13px;
+    font-size: 12px;
+    min-height: 0;
 }
 
 window#waybar {
@@ -59,7 +60,7 @@ button:hover {
     color: #282828;
     box-shadow: none;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 #workspaces button.urgent {

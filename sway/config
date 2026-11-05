@@ -39,17 +39,17 @@ input type:keyboard {
   xkb_layout "es"
 }
 
-gaps inner 3
-gaps outer 3
-default_border pixel 3
-default_floating_border pixel 3
+gaps inner 2
+gaps outer 2
+default_border pixel 4
+default_floating_border pixel 4
 
-output HDMI-1 mode 1920x1080@120Hz
+output HDMI-A-1 mode 1920x1080@120Hz position 0 0
 
 bindsym $mod+Control+1 output eDP-1 toggle
 
-# bindsym $mod+space       focus next
-# bindsym $mod+shift+space focus prev
+bindsym $mod+shift+space focus prev
+bindsym $mod+space       focus next
 
 ### Key bindings
 #
@@ -139,7 +139,7 @@ bindsym $mod+Control+1 output eDP-1 toggle
 # Switch the current container between different layout styles
 # bindsym $mod+s layout stacking
 bindsym $mod+t layout tabbed
-# bindsym $mod+e layout toggle split
+bindsym $mod+e layout toggle split
 
 # Make the current focus fullscreen
 bindsym $mod+f fullscreen
@@ -148,7 +148,7 @@ bindsym $mod+f fullscreen
 bindsym $mod+Shift+f floating toggle
 
 # Swap focus between the tiling area and the floating area
-bindsym $mod+space focus mode_toggle
+bindsym $mod+v focus mode_toggle
 
 # Move focus to the parent container
 bindsym $mod+a focus parent
@@ -206,7 +206,7 @@ bar {
 #
 # Window Rules
 #
-for_window [app_id="google-chrome" title="Meet *"] floating enable
+# for_window [app_id="google-chrome" title="Meet *"] floating enable
 for_window [class="fcadefbneo.exe"] floating enable
 for_window [app_id="blueman-manager"] floating enable
 for_window [app_id="org.pulseaudio.pavucontrol"] floating enable
